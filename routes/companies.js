@@ -24,7 +24,7 @@ router.get("/:code", async function (req, res, next) {
   const results = await db.query(
     "SELECT code, name, description FROM companies WHERE code = $1", [code]);
   const company = results.rows[0];
-  debugger;
+
   if (!company) throw new NotFoundError(`No matching company: ${code}`);
   return res.status(200).json({ company });
 });
