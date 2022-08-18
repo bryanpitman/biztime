@@ -61,6 +61,24 @@ router.get("/:id", async function (req, res, next) {
 });
 
 
+/** PUT /[id] - updates an invoice;
+ * return `{invoice: {id, comp_id, amt, paid, add_date, paid_date}}` */
+
+ router.put("/:id", async function (req, res, next) {
+
+  const id = req.params.id;
+  const results = await db.query(
+    `UPDATE invoices
+         SET amt= $1
+         WHERE id = $2
+         RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+    [req.body.amt, id]);
+  const invoice = results.rows[0];
+
+  if (!invoice) throw new NotFoundError(`No matching invoice: ${id}`);
+  return res.status(200).json({ invoice });
+});
+
 
 
 module.exports = router;
