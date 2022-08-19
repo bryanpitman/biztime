@@ -22,7 +22,11 @@ router.get("/", async function (req, res, next) {
 router.get("/:code", async function (req, res, next) {
   const code = req.params.code;
   const cResults = await db.query(
-    "SELECT code, name, description FROM companies WHERE code = $1", [code]);
+    `SELECT code, name, description
+      FROM companies
+      WHERE code = $1`,
+  [code]
+  );
   const company = cResults.rows[0];
 
   if (!company) throw new NotFoundError(`No matching company: ${code}`);
@@ -32,7 +36,9 @@ router.get("/:code", async function (req, res, next) {
         FROM invoices AS i
         JOIN companies AS c
         ON c.code = i.comp_code
-        WHERE c.code = $1`, [code]);
+        WHERE c.code = $1`,
+     [code]
+  );
   const invoices = iResults.rows;
   company.invoices = invoices;
 

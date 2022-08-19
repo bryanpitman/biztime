@@ -1,7 +1,7 @@
 /** Routes to obtain invoives. */
 
 const express = require("express");
-const { NotFoundError, BadRequestError } = require("../expressError");
+const { NotFoundError } = require("../expressError");
 
 
 const router = new express.Router();
@@ -25,7 +25,9 @@ router.get("/", async function (req, res, next) {
 router.get("/:id", async function (req, res, next) {
   const id = req.params.id;
   const iResults = await db.query(
-    "SELECT id, id, amt, paid, add_date, paid_date FROM invoices WHERE id = $1", [id]);
+    `SELECT id, amt, paid, add_date, paid_date
+     FROM invoices
+     WHERE id = $1`, [id]);
 
   const invoice = iResults.rows[0];
   if (!invoice) throw new NotFoundError(`No matching invoice: ${id}`);
@@ -61,10 +63,11 @@ router.post("/", async function (req, res, next) {
 });
 
 
-/** PUT /[id] - updates an invoice;
+/** PUT /[id] - updates an invoice with {amt};
  * return `{invoice: {id, comp_id, amt, paid, add_date, paid_date}}` */
 
 router.put("/:id", async function (req, res, next) {
+  const { amt } = req.body.amt;
 
   const id = req.params.id;
   const results = await db.query(
@@ -72,7 +75,8 @@ router.put("/:id", async function (req, res, next) {
          SET amt= $1
          WHERE id = $2
          RETURNING id, comp_code, amt, paid, add_date, paid_date`,
-    [req.body.amt, id]);
+    [amt, id]
+  );
   const invoice = results.rows[0];
 
   if (!invoice) throw new NotFoundError(`No matching invoice: ${id}`);
@@ -80,7 +84,7 @@ router.put("/:id", async function (req, res, next) {
 });
 
 /** DELETE /[id] - delete an invoice;
- * return `{status: 'Deleted'}` */
+ * return `{status: 'deleted'}` */
 
 router.delete("/:id", async function (req, res, next) {
   const results = await db.query(
@@ -90,7 +94,7 @@ router.delete("/:id", async function (req, res, next) {
   const invoice = results.rows[0];
 
   if (!invoice) throw new NotFoundError(`No matching invoice`);
-  return res.status(200).json({ status: "Deleted" });
+  return res.status(200).json({ status: "deleted" });
 });
 
 
