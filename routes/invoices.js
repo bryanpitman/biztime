@@ -43,9 +43,9 @@ router.get("/:id", async function (req, res, next) {
 });
 
 
-/** POST /[code] - create a new invoice;
+/** POST /[id] - create a new invoice;
  * return `{invoice: {id, comp_code, amt, paid, add_date, paid_date}}` */
- router.post("/", async function (req, res, next) {
+router.post("/", async function (req, res, next) {
   const { comp_code, amt } = req.body;
 
 
@@ -64,7 +64,7 @@ router.get("/:id", async function (req, res, next) {
 /** PUT /[id] - updates an invoice;
  * return `{invoice: {id, comp_id, amt, paid, add_date, paid_date}}` */
 
- router.put("/:id", async function (req, res, next) {
+router.put("/:id", async function (req, res, next) {
 
   const id = req.params.id;
   const results = await db.query(
@@ -79,6 +79,19 @@ router.get("/:id", async function (req, res, next) {
   return res.status(200).json({ invoice });
 });
 
+/** DELETE /[id] - delete an invoice;
+ * return `{status: 'Deleted'}` */
+
+router.delete("/:id", async function (req, res, next) {
+  const results = await db.query(
+    "DELETE FROM invoices WHERE id = $1 RETURNING id",
+    [req.params.id],
+  );
+  const invoice = results.rows[0];
+
+  if (!invoice) throw new NotFoundError(`No matching invoice`);
+  return res.status(200).json({ status: "Deleted" });
+});
 
 
 module.exports = router;
